@@ -21,7 +21,6 @@ def download():
     if not url:
         return "Please enter a valid URL"
 
-    # Extreme headers and extractor args to bypass YouTube 403 blocks
     bypass_headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
@@ -29,7 +28,6 @@ def download():
         'Sec-Fetch-Mode': 'navigate',
     }
 
-    # FIX HERE: Base configuration tuned strictly for Android API extraction to bypass 403 blocks
     base_opts = {
         'nocheckcertificate': True,
         'ignoreerrors': False,
@@ -38,12 +36,14 @@ def download():
         'no_warnings': True,
         'default_search': 'auto',
         'http_headers': bypass_headers,
-        # 'web' client ko hata diya hai, ab yeh strictly android banke request karega
         'extractor_args': {'youtube': {'player_client': ['android'], 'skip': ['webpage']}},
         'youtube_include_dash_manifest': False,
     }
 
-    # AUDIO DOWNLOAD CONFIGURATION
+    # Agar cookies.txt file hai toh use automatic include kar lo
+    if os.path.exists("cookies.txt"):
+        base_opts['cookiefile'] = 'cookies.txt'
+
     if file_type == "audio":
         ydl_opts = {
             **base_opts,
@@ -55,7 +55,6 @@ def download():
                 'preferredquality': '320',
             }]
         }
-    # VIDEO DOWNLOAD CONFIGURATION
     else:
         ydl_opts = {
             **base_opts,
@@ -68,13 +67,11 @@ def download():
             info = ydl.extract_info(url, download=True)
             file_path = ydl.prepare_filename(info)
 
-            # Adjust path extension if audio extraction changed it to mp3
             if file_type == "audio":
                 file_path = os.path.splitext(file_path)[0] + ".mp3"
 
         response = send_file(file_path, as_attachment=True)
 
-        # Automatically clean up the downloaded file from the server's disk storage after delivery
         @response.call_on_close
         def cleanup():
             if os.path.exists(file_path):
@@ -89,5 +86,3 @@ def download():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
-
-    
