@@ -21,7 +21,7 @@ def download():
     if not url:
         return "Please enter a valid URL"
 
-    # Common headers to bypass YouTube 403 Forbidden block
+    # Extreme headers and extractor args to bypass YouTube 403 blocks
     bypass_headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
@@ -29,13 +29,26 @@ def download():
         'Sec-Fetch-Mode': 'navigate',
     }
 
+    # Base configuration for yt-dlp to mimic a normal browser client
+    base_opts = {
+        'nocheckcertificate': True,
+        'ignoreerrors': False,
+        'logtostderr': False,
+        'quiet': True,
+        'no_warnings': True,
+        'default_search': 'auto',
+        'http_headers': bypass_headers,
+        # Yeh do lines sabsbe important hain YouTube bots ko chakma dene ke liye
+        'extractor_args': {'youtube': {'player_client': ['android', 'web']}},
+        'youtube_include_dash_manifest': False,
+    }
+
     # AUDIO DOWNLOAD CONFIGURATION
     if file_type == "audio":
         ydl_opts = {
+            **base_opts,
             'format': 'bestaudio/best',
             'outtmpl': f'{DOWNLOAD_FOLDER}/%(title)s.%(ext)s',
-            'nocheckcertificate': True,
-            'http_headers': bypass_headers,
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
@@ -45,10 +58,9 @@ def download():
     # VIDEO DOWNLOAD CONFIGURATION
     else:
         ydl_opts = {
-            'format': 'best', # 'bestvideo+bestaudio' ki jagah simple 'best' rakha hai taaki processing fast ho aur bypass aaram se ho
+            **base_opts,
+            'format': 'best',
             'outtmpl': f'{DOWNLOAD_FOLDER}/%(title)s.%(ext)s',
-            'nocheckcertificate': True,
-            'http_headers': bypass_headers
         }
 
     try:
@@ -75,6 +87,5 @@ def download():
 
 
 if __name__ == '__main__':
-    # Looks for Railway's port variable, defaults to 5000 if not found
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
