@@ -29,7 +29,7 @@ def download():
         'Sec-Fetch-Mode': 'navigate',
     }
 
-    # Base configuration for yt-dlp to mimic a normal browser client
+    # FIX HERE: Base configuration tuned strictly for Android API extraction to bypass 403 blocks
     base_opts = {
         'nocheckcertificate': True,
         'ignoreerrors': False,
@@ -38,8 +38,8 @@ def download():
         'no_warnings': True,
         'default_search': 'auto',
         'http_headers': bypass_headers,
-        # Yeh do lines sabsbe important hain YouTube bots ko chakma dene ke liye
-        'extractor_args': {'youtube': {'player_client': ['android', 'web']}},
+        # 'web' client ko hata diya hai, ab yeh strictly android banke request karega
+        'extractor_args': {'youtube': {'player_client': ['android'], 'skip': ['webpage']}},
         'youtube_include_dash_manifest': False,
     }
 
