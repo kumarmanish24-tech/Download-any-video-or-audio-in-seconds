@@ -21,11 +21,21 @@ def download():
     if not url:
         return "Please enter a valid URL"
 
+    # Common headers to bypass YouTube 403 Forbidden block
+    bypass_headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Sec-Fetch-Mode': 'navigate',
+    }
+
     # AUDIO DOWNLOAD CONFIGURATION
     if file_type == "audio":
         ydl_opts = {
             'format': 'bestaudio/best',
             'outtmpl': f'{DOWNLOAD_FOLDER}/%(title)s.%(ext)s',
+            'nocheckcertificate': True,
+            'http_headers': bypass_headers,
             'postprocessors': [{
                 'key': 'FFmpegExtractAudio',
                 'preferredcodec': 'mp3',
@@ -35,8 +45,10 @@ def download():
     # VIDEO DOWNLOAD CONFIGURATION
     else:
         ydl_opts = {
-            'format': 'bestvideo+bestaudio/best',
-            'outtmpl': f'{DOWNLOAD_FOLDER}/%(title)s.%(ext)s'
+            'format': 'best', # 'bestvideo+bestaudio' ki jagah simple 'best' rakha hai taaki processing fast ho aur bypass aaram se ho
+            'outtmpl': f'{DOWNLOAD_FOLDER}/%(title)s.%(ext)s',
+            'nocheckcertificate': True,
+            'http_headers': bypass_headers
         }
 
     try:
