@@ -62,7 +62,9 @@ def download():
         return f"Error: {str(e)}"
 
 
-if __name__ == "__main__":
-    # Dynamically bind to the PORT environment variable provided by Railway (defaulting to 5000 locally)
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+if __name__ == '__main__':
+    # Railway passes the port dynamically. Default to 5000 or 8080 for local development.
+    port = int(os.environ.get('PORT', 8080))
+    
+    # Ensure it binds to 0.0.0.0 so it can accept external requests inside the container
+    app.run(host='0.0.0.0', port=port)
